@@ -730,7 +730,7 @@ function renderTeam() {
     for (const m of MATCHES) {
       if (task(m, "lavage").who === p) lav++;
       const food = FOOD.filter(i => m.home && task(m, i.k).who === p);
-      if (food.length) { meals++; spend += food.reduce((s, i) => s + i.price, 0); }
+      if (food.length) { meals += food.length; spend += food.reduce((s, i) => s + i.price, 0); }
     }
     return { p, lav, meals, spend, total: lav + meals };
   }).sort((a, b) => b.total - a.total || b.spend - a.spend || a.p.localeCompare(b.p));
@@ -752,7 +752,7 @@ function renderTeam() {
           <div class="who"><b>${esc(r.p)}</b><div class="bars">${r.lav ? `<i class="l" style="width:${r.lav / max * 100}%"></i>` : ""}${r.meals ? `<i class="r" style="width:${r.meals / max * 100}%"></i>` : ""}</div></div>
           <div class="score"><b>${r.lav}</b> lav. · <b>${r.meals}</b> repas${r.spend ? `<br>≈ ${euro(r.spend)}` : ""}</div></div>`).join("")}
       </div>
-      <div class="note">Repas = nombre de matchs où le joueur apporte au moins un article. Montants estimés au prix supermarché.</div>
+      <div class="note">Repas = nombre total d'articles pris par le joueur sur la saison. Montants estimés au prix supermarché.</div>
     </div>
     <div class="section">
       <div class="section-head"><h3>Panier d'après-match</h3><span class="label">par match à domicile</span></div>
