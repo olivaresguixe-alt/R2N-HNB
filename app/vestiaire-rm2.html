@@ -768,8 +768,7 @@ function renderSheet() {
     const t = task(m, i.k);
     return `<div class="row ${t.who === S.me ? "mine" : ""}">
       <button class="tick ${t.done ? "on" : ""}" data-tick="${m.id}|${i.k}" ${t.who === S.me ? "" : "disabled"} aria-pressed="${t.done}" aria-label="${esc(i.label)} fait">${CHECK}</button>
-      <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when && i.k !== "lavage" ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span>
-        ${t.who === S.me && !t.done && !past && i.k !== "lavage" ? planForm(m, [i.k], `sp-${i.k}`) : ""}</div>
+      <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when && i.k !== "lavage" ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span></div>
       ${!t.who ? (past ? `<span class="muted">Personne</span>` : `<button class="btn small" data-take="${m.id}|${i.k}">Je prends</button>`)
         : `<div class="row-end"><span class="owner">${jersey(t.who)}${t.who === S.me ? "Moi" : esc(t.who)}</span>${t.who === S.me && !past && !t.done ? `<button class="link" data-release="${m.id}|${i.k}">Libérer</button>` : ""}</div>`}
     </div>`;
