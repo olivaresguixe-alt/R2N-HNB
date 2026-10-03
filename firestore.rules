@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Tasks: one document per match + item ("2026-10-10__dinde")
+    match /assign/{id} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasOnly(['m', 'k', 'who', 'done', 'when', 'slot', 'by'])
+                   && request.resource.data.who is string && request.resource.data.who.size() < 40;
+    }
+    // Carpooling: one document per match + player ("2026-10-03__carles")
+    match /rides/{id} {
+      allow read: if true;
+      allow delete: if true;
+      allow write: if request.resource.data.keys().hasOnly(['m', 'who', 'role', 'seats', 'car'])
+                   && request.resource.data.role in ['driver', 'passenger'];
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
