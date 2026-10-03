@@ -1,6 +1,6 @@
-# Vestiaire RM2
+# R2N-HNB
 
-Appli de l'équipe RM2 : calendrier des matchs, courses d'après-match, lavage des maillots et covoiturage.
+Appli de l'équipe R2N-HNB : calendrier des matchs, courses d'après-match, lavage des maillots et covoiturage.
 
 - `app/vestiaire-rm2.html` : source de l'appli (publiée aussi comme Artifact Claude).
 - `index.html` : site public (GitHub Pages), généré par `python3 build.py`.

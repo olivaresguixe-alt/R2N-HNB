@@ -7,7 +7,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 </head>
 <body>
-<title>Vestiaire RM2</title>
+<title>R2N-HNB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
@@ -490,7 +490,7 @@ function render() {
   app.innerHTML = `
     <div class="wrap">
       <header class="top">
-        <div class="brand">${BALL}<div class="brand-name">RM2 <span>Vestiaire</span></div></div>
+        <div class="brand">${BALL}<div class="brand-name">R2N-<span>HNB</span></div></div>
         <button class="me" id="switch" title="Changer de joueur">${jersey(S.me)}<b>${esc(S.me)}</b></button>
       </header>
       <div class="stack">
@@ -507,7 +507,7 @@ function render() {
 
 function renderLogin() {
   return `<div class="wrap"><div class="login">
-    <div class="brand">${BALL}<div class="brand-name">RM2 <span>Vestiaire</span></div></div>
+    <div class="brand">${BALL}<div class="brand-name">R2N-<span>HNB</span></div></div>
     <div style="display:grid;gap:10px">
       <h1>Qui est dans le vestiaire&nbsp;?</h1>
       <p>Choisis ton nom. L'appli te dit ensuite ce que tu dois apporter, laver ou conduire pour le prochain match.</p>
