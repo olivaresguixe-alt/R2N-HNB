@@ -575,7 +575,7 @@ function renderHero(a) {
   const food = a.items.filter(i => i.k !== "lavage");
   const owe = food.reduce((s, i) => s + i.price, 0);
   const onlyLavage = a.items.length === 1 && a.items[0].k === "lavage";
-  const plan = a.pending.map(i => task(m, i.k)).find(t => t.when);
+  const plan = a.pending.filter(i => i.k !== "lavage").map(i => task(m, i.k)).find(t => t.when);
   const clockISO = plan && daysUntil(plan.when) >= 0 ? plan.when : m.id;
   const clockSub = plan ? `Prévu ${planText(plan)} · match ${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })}` : longDate(m.id);
   const title = onlyLavage ? "Lavage des maillots" : food.length && a.items.some(i => i.k === "lavage") ? `Courses et maillots · ${m.opp}` : `Courses pour ${m.opp}`;
@@ -601,7 +601,7 @@ function renderHero(a) {
 function groupPlans(m, pending) {
   const food = pending.filter(i => i.k !== "lavage").map(i => i.k);
   const lav = pending.filter(i => i.k === "lavage").map(i => i.k);
-  return [food.length ? planForm(m, food, "hp-f") : "", lav.length ? planForm(m, lav, "hp-l") : ""].join("");
+  return food.length ? planForm(m, food, "hp-f") : "";
 }
 function renderHome() {
   const acts = myActions();
@@ -633,7 +633,7 @@ function renderHome() {
     html += `<div class="section"><div class="section-head"><h3>Ensuite</h3><span class="label">${acts.length - 1} à venir</span></div><div class="next-list">
       ${rest.map(a => `<button class="card next-item" data-open="${a.m.id}"><span class="when">${countdown(a.m.id)}</span><span class="what">
         <b>${a.type === "ride" ? "Trajet à organiser" : a.pending.map(i => i.short || i.label).join(", ")}</b>
-        <span>${fmt(a.m.id, { weekday: "short", day: "numeric", month: "short" })} · ${esc(vs(a.m))}${a.type === "tasks" ? (() => { const t = a.pending.map(i => task(a.m, i.k)).find(x => x.when); return t ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ` · <span style="color:var(--orange-ink)">date à fixer</span>`; })() : ""}</span></span>${CHEV}</button>`).join("")}
+        <span>${fmt(a.m.id, { weekday: "short", day: "numeric", month: "short" })} · ${esc(vs(a.m))}${a.type === "tasks" && a.pending.some(i => i.k !== "lavage") ? (() => { const t = a.pending.filter(i => i.k !== "lavage").map(i => task(a.m, i.k)).find(x => x.when); return t ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ` · <span style="color:var(--orange-ink)">date à fixer</span>`; })() : ""}</span></span>${CHEV}</button>`).join("")}
     </div></div>`;
   }
   const [colA, colB] = html.split("<!--split-->");
@@ -764,8 +764,8 @@ function renderSheet() {
     const t = task(m, i.k);
     return `<div class="row ${t.who === S.me ? "mine" : ""}">
       <button class="tick ${t.done ? "on" : ""}" data-tick="${m.id}|${i.k}" ${t.who === S.me ? "" : "disabled"} aria-pressed="${t.done}" aria-label="${esc(i.label)} fait">${CHECK}</button>
-      <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span>
-        ${t.who === S.me && !t.done && !past ? planForm(m, [i.k], `sp-${i.k}`) : ""}</div>
+      <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when && i.k !== "lavage" ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span>
+        ${t.who === S.me && !t.done && !past && i.k !== "lavage" ? planForm(m, [i.k], `sp-${i.k}`) : ""}</div>
       ${!t.who ? (past ? `<span class="muted">Personne</span>` : `<button class="btn small" data-take="${m.id}|${i.k}">Je prends</button>`)
         : `<div class="row-end"><span class="owner">${jersey(t.who)}${t.who === S.me ? "Moi" : esc(t.who)}</span>${t.who === S.me && !past && !t.done ? `<button class="link" data-release="${m.id}|${i.k}">Libérer</button>` : ""}</div>`}
     </div>`;
