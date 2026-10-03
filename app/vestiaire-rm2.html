@@ -672,16 +672,12 @@ function renderBoard() {
   const f = S.boardFilter;
   const list = f === "all" ? MATCHES : MATCHES.filter(m => !isPast(m));
   const upcoming = MATCHES.filter(m => !isPast(m));
-  const soon = upcoming.filter(m => m.home).slice(0, 4);
+  const soon = upcoming.slice(0, 4);
   const holes = soon.reduce((s, m) => s + itemsFor(m).filter(i => !task(m, i.k).who).length, 0);
   const cols = ITEMS;
   const head = `<tr><th class="mcol">Match</th>${cols.map(i => `<th title="${esc(i.label)}">${esc(i.short)}</th>`).join("")}<th title="voitures · places libres">Voit.</th><th>Manque</th></tr>`;
   const rows = list.map(m => {
     const past = isPast(m);
-    if (!m.home) {
-      const lav = task(m, "lavage").who; const n = ridesFor(m).drivers.length;
-      return `<tr class="away"><td class="mcol"><div><b>@ ${esc(m.opp)}</b><span>${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })} · Ext</span></div></td>${cols.map(i => i.k === "lavage" ? `<td><span class="cell static">${lav ? esc(lav) : "—"}</span></td>` : `<td class="na">·</td>`).join("")}<td><span class="cell static">${n ? `${n}v` : "—"}</span></td><td></td></tr>`;
-    }
     const cells = cols.map(i => {
       if (!m.home && i.k !== "lavage") return `<td class="na">·</td>`;
       const t = task(m, i.k);
@@ -693,13 +689,13 @@ function renderBoard() {
     if (!m.home) { const r = ridesFor(m); const n = r.drivers.length; const left = r.drivers.reduce((s, d) => s + (d.seats || 0), 0) - r.passengers.length; const mine = !!myRide(m);
       car = `<td><button class="cell ${n ? "" : "free"} ${mine ? "mine" : ""}" data-open="${m.id}" aria-label="Covoiturage ${esc(m.opp)}" title="${n} voiture(s), ${left} place(s) libre(s)">${n ? `${n}v · ${left}pl` : "+"}</button></td>`; }
     const miss = missingIn(m);
-    return `<tr class="${past ? "past" : ""}"><td class="mcol"><button data-open="${m.id}"><b>${m.home ? "" : "@ "}${esc(m.opp)}</b><span>${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })} · ${m.home ? "Dom" : "Ext"}</span></button></td>${cells}${car}<td><span class="miss ${miss ? "ko" : "ok"} num">${past ? "" : miss ? miss : "✓"}</span></td></tr>`;
+    return `<tr class="${past ? "past" : ""} ${m.home ? "" : "away"}"><td class="mcol"><button data-open="${m.id}"><b>${m.home ? "" : "@ "}${esc(m.opp)}</b><span>${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })} · ${m.home ? "Dom" : "Ext"}</span></button></td>${cells}${car}<td><span class="miss ${miss ? "ko" : "ok"} num">${past ? "" : miss ? miss : "✓"}</span></td></tr>`;
   }).join("");
   return `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Tableau</h3><span class="label">Qui apporte quoi</span></div>
-    <div class="card alert"><b class="big ${holes ? "" : "ok"}">${holes || "✓"}</b><div>${holes ? `<b>poste${holes > 1 ? "s" : ""} encore libre${holes > 1 ? "s" : ""}</b> sur les ${soon.length} prochains matchs à domicile. Touche un <span style="color:var(--orange-ink);font-weight:700">+</span> pour le prendre.` : `<b>Tout est pris</b> pour les ${soon.length} prochains matchs à domicile. Merci l'équipe !`}</div></div>
+    <div class="card alert"><b class="big ${holes ? "" : "ok"}">${holes || "✓"}</b><div>${holes ? `<b>poste${holes > 1 ? "s" : ""} encore libre${holes > 1 ? "s" : ""}</b> sur les ${soon.length} prochains matchs. Touche un <span style="color:var(--orange-ink);font-weight:700">+</span> pour le prendre.` : `<b>Tout est pris</b> pour les ${soon.length} prochains matchs. Merci l'équipe !`}</div></div>
     <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
     <div class="board-wrap"><table class="board"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
-    <div class="legend"><span><i style="background:var(--orange)"></i>Moi</span><span><i style="border:1.5px dashed var(--orange)"></i>Libre</span><span>✓ fait</span><span>Voit. : voitures · places libres</span><span>Lignes grisées : matchs à l'extérieur (pas de repas, consultation seule)</span></div>`;
+    <div class="legend"><span><i style="background:var(--orange)"></i>Moi</span><span><i style="border:1.5px dashed var(--orange)"></i>Libre</span><span>✓ fait</span><span>Voit. : voitures · places libres</span><span>Lignes grisées : matchs à l'extérieur (maillots et voitures seulement)</span></div>`;
 }
 function renderCal() {
   const f = S.calFilter;
