@@ -1,0 +1,817 @@
+<title>Vestiaire RM2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: one-column phone app. Scoreboard hero for the next mission, cards below, fixed tab bar at the bottom. */
+:root {
+  --bg: #eceff4;
+  --surface: #ffffff;
+  --surface-2: #f5f7fa;
+  --ink: #111a2c;
+  --muted: #5b6579;
+  --line: #d8dde7;
+  --orange: #e2560b;
+  --orange-ink: #b54200;
+  --orange-soft: #fde6d6;
+  --wood: #c88a4c;
+  --good: #1d8549;
+  --good-soft: #dcf2e4;
+  --hero-bg: #111a2c;
+  --hero-fg: #f4f6fa;
+  --hero-muted: #9aa6bd;
+  --hero-line: rgba(255,255,255,.12);
+  --shadow: 0 1px 2px rgba(17,26,44,.06), 0 6px 20px rgba(17,26,44,.06);
+  --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-label: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1020; --surface: #131b2d; --surface-2: #19233a; --ink: #edf1f8; --muted: #94a0b7;
+    --line: #253150; --orange: #ff7a2e; --orange-ink: #ff9a5c; --orange-soft: #3a2116; --wood: #d9a066;
+    --good: #3fcf7f; --good-soft: #173826; --hero-bg: #18233b; --hero-fg: #f4f6fa; --hero-muted: #9aa6bd;
+    --hero-line: rgba(255,255,255,.10); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1020; --surface: #131b2d; --surface-2: #19233a; --ink: #edf1f8; --muted: #94a0b7;
+  --line: #253150; --orange: #ff7a2e; --orange-ink: #ff9a5c; --orange-soft: #3a2116; --wood: #d9a066;
+  --good: #3fcf7f; --good-soft: #173826; --hero-bg: #18233b; --hero-fg: #f4f6fa; --hero-muted: #9aa6bd;
+  --hero-line: rgba(255,255,255,.10); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 0 110px; }
+.label { font-family: var(--f-label); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- Login ---------- */
+.login { padding-block: 32px 40px; display: grid; gap: 24px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.ball { width: 44px; height: 44px; flex: none; }
+.brand-name { font-family: var(--f-display); font-weight: 900; font-size: 30px; letter-spacing: .01em; line-height: 1; text-transform: uppercase; }
+.brand-name span { color: var(--orange); }
+.login h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(40px, 11vw, 60px); line-height: .92; text-transform: uppercase; }
+.login p { margin: 0; color: var(--muted); max-width: 40ch; }
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.pick { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px 10px; display: grid; justify-items: center; gap: 4px; transition: transform .15s ease, border-color .15s ease; }
+.pick:hover { transform: translateY(-2px); border-color: var(--orange); }
+.pick .jersey { width: 56px; height: 56px; }
+.pick b { font-family: var(--f-label); font-weight: 700; font-size: 17px; letter-spacing: .02em; }
+.pick small { color: var(--muted); font-size: 12px; }
+
+/* ---------- Top bar ---------- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+.top .brand-name { font-size: 24px; }
+.top .ball { width: 32px; height: 32px; }
+.me { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 4px; }
+.me .jersey { width: 30px; height: 30px; }
+.me b { font-family: var(--f-label); font-weight: 700; font-size: 16px; }
+
+.banner { background: var(--orange-soft); color: var(--orange-ink); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+
+/* ---------- Hero (scoreboard) ---------- */
+.hero { position: relative; overflow: hidden; background: var(--hero-bg); color: var(--hero-fg); border-radius: 22px; padding: 20px 20px 22px; display: grid; gap: 14px; box-shadow: var(--shadow); }
+.hero > * { position: relative; }
+.hero .court { position: absolute; inset: auto -40px -70px auto; width: 260px; height: 260px; color: var(--hero-line); pointer-events: none; }
+.hero .label { color: var(--orange); }
+.hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.clock { font-family: var(--f-display); font-weight: 900; font-size: clamp(56px, 18vw, 84px); line-height: .85; letter-spacing: .01em; color: var(--orange); font-variant-numeric: tabular-nums; }
+.clock small { display: block; font-family: var(--f-label); font-weight: 600; font-size: 14px; letter-spacing: .08em; color: var(--hero-muted); text-transform: uppercase; margin-top: 6px; }
+.hero h2 { font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 7.5vw, 38px); line-height: 1; text-transform: uppercase; }
+.hero .sub { color: var(--hero-muted); font-size: 15px; margin-top: 4px; }
+.todo { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.todo li { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.06); border: 1px solid var(--hero-line); border-radius: 12px; padding: 10px 12px; }
+.todo li.done { opacity: .55; }
+.todo li.done .t { text-decoration: line-through; }
+.todo .t { flex: 1; min-width: 0; font-weight: 600; }
+.todo .p { font-family: var(--f-label); color: var(--hero-muted); font-size: 15px; }
+.tick { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 2px solid var(--hero-muted); background: transparent; display: grid; place-items: center; padding: 0; color: transparent; transition: background .15s, border-color .15s; }
+.tick svg { width: 16px; height: 16px; }
+.tick.on { background: var(--good); border-color: var(--good); color: #fff; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 0; border-radius: 12px; padding: 11px 16px; font-family: var(--f-label); font-weight: 700; font-size: 17px; letter-spacing: .03em; text-transform: uppercase; background: var(--orange); color: #fff; transition: transform .1s ease, filter .15s; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(.97); }
+.btn.ghost { background: transparent; color: inherit; border: 1.5px solid currentColor; }
+.btn.small { padding: 7px 12px; font-size: 15px; border-radius: 10px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.hero .btn.ghost { color: var(--hero-fg); border-color: var(--hero-line); }
+.money { font-family: var(--f-label); font-size: 16px; color: var(--hero-muted); }
+.money b { color: var(--hero-fg); font-weight: 700; }
+.allclear { display: grid; gap: 6px; }
+
+/* ---------- Sections & cards ---------- */
+.stack { display: grid; gap: 22px; }
+.section { display: grid; gap: 10px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.section-head h3 { font-family: var(--f-display); font-weight: 800; font-size: 24px; text-transform: uppercase; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+.match { display: flex; align-items: center; gap: 14px; padding: 12px 14px; width: 100%; text-align: left; transition: border-color .15s; }
+button.match:hover { border-color: var(--orange); }
+.date { width: 54px; flex: none; text-align: center; border-right: 1px solid var(--line); padding-right: 12px; }
+.date .d { font-family: var(--f-display); font-weight: 900; font-size: 32px; line-height: .9; font-variant-numeric: tabular-nums; }
+.date .m { font-family: var(--f-label); font-weight: 600; text-transform: uppercase; font-size: 13px; letter-spacing: .06em; color: var(--muted); }
+.match .body { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.match .opp { font-family: var(--f-label); font-weight: 700; font-size: 21px; line-height: 1.1; }
+.match .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 9px; font-family: var(--f-label); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.pill.dom { background: var(--orange-soft); color: var(--orange-ink); }
+.pill.ext { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.pill.me { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--orange); color: #fff; }
+.meter { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--orange); border-radius: 3px; }
+.match.past { opacity: .5; }
+.chev { color: var(--muted); flex: none; }
+.month { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: 20px; color: var(--muted); margin-top: 6px; }
+.list { display: grid; gap: 8px; }
+
+.next-list { display: grid; gap: 8px; }
+.next-item { display: flex; gap: 12px; align-items: center; padding: 12px 14px; width: 100%; text-align: left; }
+.next-item .when { font-family: var(--f-display); font-weight: 900; font-size: 22px; color: var(--orange); width: 58px; flex: none; font-variant-numeric: tabular-nums; }
+.next-item .what { flex: 1; min-width: 0; }
+.next-item .what b { display: block; font-weight: 600; }
+.next-item .what span { color: var(--muted); font-size: 14px; }
+
+.free { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 12px; padding: 8px 12px; font-weight: 600; font-size: 15px; transition: border-color .15s, background .15s; }
+.chip:hover { border-color: var(--orange); background: var(--orange-soft); }
+.chip .plus { font-family: var(--f-display); font-weight: 900; color: var(--orange); font-size: 20px; line-height: 1; }
+
+.seg { display: flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { flex: 1; border: 0; background: transparent; border-radius: 9px; padding: 8px 6px; font-family: var(--f-label); font-weight: 700; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+/* ---------- Team ---------- */
+.rank { display: grid; gap: 2px; padding: 6px; }
+.rank-row { display: grid; grid-template-columns: 28px 30px 1fr auto; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; }
+.rank-row.me { background: var(--orange-soft); }
+.rank-row .pos { font-family: var(--f-display); font-weight: 900; font-size: 20px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.rank-row .jersey { width: 30px; height: 30px; }
+.rank-row .who { min-width: 0; display: grid; gap: 4px; }
+.rank-row .who b { font-family: var(--f-label); font-weight: 700; font-size: 17px; }
+.bars { display: flex; gap: 3px; height: 8px; }
+.bars i { display: block; border-radius: 2px; }
+.bars .l { background: var(--wood); }
+.bars .r { background: var(--orange); }
+.rank-row .score { text-align: right; font-family: var(--f-label); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rank-row .score b { color: var(--ink); font-size: 17px; }
+.legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { padding: 12px; display: grid; gap: 2px; }
+.stat b { font-family: var(--f-display); font-weight: 900; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--muted); }
+.price-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.price-table td { padding: 9px 14px; border-top: 1px solid var(--line); }
+.price-table tr:first-child td { border-top: 0; }
+.price-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.price-table tr.total td { font-weight: 700; background: var(--surface-2); }
+
+/* ---------- Tab bar ---------- */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabs-inner { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+.tabs button { border: 0; background: transparent; padding: 10px 4px 12px; display: grid; justify-items: center; gap: 3px; color: var(--muted); font-family: var(--f-label); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.tabs button svg { width: 24px; height: 24px; }
+.tabs button.on { color: var(--orange); }
+
+/* ---------- Sheet ---------- */
+.scrim { position: fixed; inset: 0; z-index: 20; background: rgba(8,12,22,.55); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--bg); width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto; border-radius: 22px 22px 0 0; padding: 0 16px calc(28px + env(safe-area-inset-bottom, 0px)); animation: up .22s ease-out; }
+@keyframes up { from { transform: translateY(30px); opacity: .6; } to { transform: none; opacity: 1; } }
+.sheet-head { position: sticky; top: 0; background: var(--bg); padding-block: 14px 12px; display: flex; align-items: flex-start; gap: 12px; z-index: 1; }
+.sheet-head .grab { position: absolute; top: 6px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: var(--line); }
+.sheet-head h2 { font-family: var(--f-display); font-weight: 900; font-size: 34px; line-height: .95; text-transform: uppercase; margin-top: 4px; }
+.sheet-head .x { margin-left: auto; flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.sheet-body { display: grid; gap: 20px; }
+.rows { display: grid; }
+.row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .it { flex: 1; min-width: 0; }
+.row .it b { display: block; font-weight: 600; font-size: 15px; }
+.row .it span { font-size: 13px; color: var(--muted); }
+.row.mine { background: var(--orange-soft); }
+.row .tick { border-color: var(--line); width: 28px; height: 28px; }
+.row .tick.on { border-color: var(--good); }
+.owner { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-label); font-weight: 700; font-size: 16px; white-space: nowrap; }
+.owner .jersey { width: 24px; height: 24px; }
+.row-end { display: grid; justify-items: end; gap: 4px; flex: none; }
+.link { border: 0; background: none; padding: 0; font-size: 13px; color: var(--muted); text-decoration: underline; }
+/* Board */
+.board-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.board { border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 100%; }
+.board th, .board td { padding: 4px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+.board thead th { position: sticky; top: 0; background: var(--surface-2); font-family: var(--f-label); font-weight: 700; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 8px 4px; z-index: 1; }
+.board .mcol { position: sticky; left: 0; background: var(--surface); text-align: left; padding: 6px 10px; border-right: 1px solid var(--line); z-index: 2; min-width: 112px; }
+.board thead .mcol { background: var(--surface-2); z-index: 3; }
+.board .mcol button { border: 0; background: none; padding: 0; text-align: left; display: grid; }
+.board .mcol b { font-family: var(--f-label); font-weight: 700; font-size: 16px; line-height: 1.1; }
+.board .mcol span { font-size: 12px; color: var(--muted); }
+.board tr.past td { opacity: .45; }
+.board tr:last-child td { border-bottom: 0; }
+.cell { width: 100%; min-width: 66px; border-radius: 8px; padding: 7px 4px; font-family: var(--f-label); font-weight: 700; font-size: 14px; border: 1px solid transparent; background: var(--surface-2); }
+.cell.free { background: transparent; border: 1.5px dashed var(--orange); color: var(--orange-ink); font-size: 18px; line-height: 1; padding: 5px 4px; }
+.cell.free:hover { background: var(--orange-soft); }
+.cell.mine { background: var(--orange); color: #fff; }
+.cell.done::after { content: " ✓"; color: var(--good); }
+.cell.mine.done::after { color: #fff; }
+.board td.na { color: var(--line); }
+.board .miss { font-family: var(--f-display); font-weight: 900; font-size: 18px; }
+.board .miss.ok { color: var(--good); }
+.board .miss.ko { color: var(--orange-ink); }
+.alert { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.alert b.big { font-family: var(--f-display); font-weight: 900; font-size: 36px; line-height: 1; color: var(--orange); font-variant-numeric: tabular-nums; }
+.alert b.big.ok { color: var(--good); }
+.car { padding: 12px 14px; display: grid; gap: 10px; }
+.car-top { display: flex; align-items: center; gap: 10px; }
+.car-top .jersey { width: 34px; height: 34px; }
+.car-top b { font-family: var(--f-label); font-weight: 700; font-size: 18px; }
+.car-top .seats-left { margin-left: auto; }
+.seats { display: flex; gap: 6px; flex-wrap: wrap; }
+.seat { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.seat .jersey { width: 22px; height: 22px; }
+.seat.empty { padding: 4px 10px; border-style: dashed; color: var(--muted); font-weight: 500; }
+.drive-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 14px; }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.stepper button { border: 0; background: transparent; width: 36px; height: 36px; font-size: 20px; font-weight: 700; }
+.stepper output { min-width: 28px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.plan { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.plan label { font-weight: 600; font-size: 15px; }
+.plan input, .plan select { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); padding: 7px 9px; font-size: 15px; font-weight: 600; min-width: 0; }
+.plan.empty input { border-color: var(--orange); border-style: dashed; }
+.hero .plan { background: rgba(255,255,255,.06); border: 1px solid var(--hero-line); border-radius: 12px; padding: 10px 12px; }
+.hero .plan label { color: var(--hero-fg); }
+.row .plan { margin-top: 6px; }
+.row .plan label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.row .plan input, .row .plan select { padding: 5px 7px; font-size: 14px; }
+.planned { color: var(--good); font-weight: 600; }
+.hero .planned { color: #6fe3a0; }
+.note { font-size: 14px; color: var(--muted); }
+
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 30; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 15px; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+
+<div id="app"></div>
+<div id="sheet-root"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ===== Data from "Orga logistique RM2.xlsx" ===== */
+const PLAYERS = ["Max","Quentin","Nico","Paco","Benji","Mathieu","Léo","Carles","Malek","Yassin","Lakbir","Thibaud","Raoul","Guillaume"];
+const ITEMS = [
+  { k: "lavage", label: "Lavage des maillots", short: "Maillots", price: 0 },
+  { k: "dinde", short: "Dinde", label: "20 tranches dinde/poulet", price: 7 },
+  { k: "emmental", short: "Emmental", label: "20 tranches emmental", price: 5 },
+  { k: "coulommiers", short: "Coulom.", label: "2 Coulommiers", price: 5 },
+  { k: "rillette", short: "Rillette", label: "1 pot rillette volaille", price: 3 },
+  { k: "soft", short: "Soft", label: "2 bouteilles de soft", price: 3 },
+  { k: "chips", short: "Chips", label: "2 paquets de chips", price: 4 },
+  { k: "bananes", short: "Bananes", label: "10 bananes", price: 2 },
+  { k: "baguettes", short: "Baguettes", label: "8 baguettes", price: 10 },
+  { k: "pizzas", short: "Pizzas", label: "2 pizzas", price: 9 },
+];
+const FOOD = ITEMS.filter(i => i.k !== "lavage");
+const BASKET = FOOD.reduce((s, i) => s + i.price, 0);
+const MATCHES = [
+  ["2026-08-28", 1, "Saint Jory", { lavage: "Thibaud", dinde: "Mathieu", emmental: "Max", rillette: "Mathieu", soft: "Max", chips: "Quentin", baguettes: "Mathieu", pizzas: "Max" }],
+  ["2026-09-03", 1, "Verfeil", { lavage: "Lakbir", chips: "Quentin", pizzas: "Thibaud" }],
+  ["2026-09-11", 1, "Labège", { lavage: "Yassin", chips: "Quentin" }],
+  ["2026-09-19", 0, "Saint Jory", { lavage: "Carles" }],
+  ["2026-09-26", 1, "BAB'SS", { lavage: "Max", dinde: "Raoul", coulommiers: "Mathieu", rillette: "Raoul", chips: "Quentin", baguettes: "Mathieu" }],
+  ["2026-10-03", 0, "Albi", {}],
+  ["2026-10-10", 1, "Lavaur", { dinde: "Guillaume", emmental: "Guillaume", coulommiers: "Léo", rillette: "Max", soft: "Léo", chips: "Max", baguettes: "Max", pizzas: "Nico" }],
+  ["2026-10-31", 0, "Quint", {}],
+  ["2026-11-07", 1, "Cahors 2", { coulommiers: "Guillaume", rillette: "Guillaume", soft: "Guillaume" }],
+  ["2026-11-14", 0, "Caussade", {}],
+  ["2026-11-28", 1, "Villefranche", { lavage: "Guillaume", emmental: "Léo", chips: "Guillaume", bananes: "Guillaume", baguettes: "Nico", pizzas: "Léo" }],
+  ["2026-12-05", 0, "ALBA", {}],
+  ["2026-12-12", 1, "Launaguet", { lavage: "Nico", bananes: "Nico" }],
+  ["2027-01-09", 1, "Moissac", { chips: "Nico" }],
+  ["2027-01-16", 1, "Saint Jory", { soft: "Nico" }],
+  ["2027-01-23", 0, "BAB'SS", { lavage: "Max" }],
+  ["2027-01-30", 1, "Albi", { dinde: "Léo", emmental: "Léo", rillette: "Nico" }],
+  ["2027-02-06", 0, "Lavaur", {}],
+  ["2027-02-27", 1, "Quint", { coulommiers: "Nico" }],
+  ["2027-03-06", 0, "Cahors 2", {}],
+  ["2027-03-13", 1, "Caussade", { emmental: "Nico", chips: "Léo" }],
+  ["2027-03-20", 0, "Villefranche", {}],
+  ["2027-04-17", 1, "ALBA", { lavage: "Guillaume", dinde: "Nico" }],
+  ["2027-04-24", 0, "Launaguet", {}],
+  ["2027-05-01", 0, "Moissac", { lavage: "Nico" }],
+].map(([id, home, opp, a]) => ({ id, home: !!home, opp, a }));
+
+/* ===== Helpers ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const slug = n => n.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const pad = n => String(n).padStart(2, "0");
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const toDate = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d); };
+const daysUntil = iso => Math.round((toDate(iso) - toDate(todayISO())) / 86400000);
+const fmt = (iso, opts) => new Intl.DateTimeFormat("fr-FR", opts).format(toDate(iso));
+const longDate = iso => { const s = fmt(iso, { weekday: "long", day: "numeric", month: "long" }); return s[0].toUpperCase() + s.slice(1); };
+const where = m => m.home ? "à domicile" : "à l'extérieur";
+const vs = m => m.home ? `contre ${m.opp}` : `à ${m.opp}`;
+const isPast = m => daysUntil(m.id) < 0;
+const countdown = iso => { const n = daysUntil(iso); return n === 0 ? "Auj." : n === 1 ? "Dem." : `J-${n}`; };
+const countdownLong = iso => { const n = daysUntil(iso); return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : `J-${n}`; };
+const euro = n => `${n} €`;
+
+function jersey(name) {
+  const i = Math.max(0, PLAYERS.indexOf(name));
+  const hue = Math.round((i * 360) / PLAYERS.length + 18) % 360;
+  const ini = esc(name.slice(0, 2).toUpperCase());
+  return `<svg class="jersey" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 6h7c1 4 3 6 5 6s4-2 5-6h7l12 8-5 11-6-3v36H19V22l-6 3-5-11z" fill="hsl(${hue} 62% 46%)"/><path d="M27 6c1 4 3 6 5 6s4-2 5-6" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2"/><text x="32" y="45" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="900" font-size="19" fill="#fff">${ini}</text></svg>`;
+}
+const BALL = `<svg class="ball" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="var(--orange)"/><g fill="none" stroke="var(--hero-bg)" stroke-width="2.2"><circle cx="24" cy="24" r="22"/><path d="M2 24h44M24 2v44M9 8c6 5 9 10 9 16s-3 11-9 16M39 8c-6 5-9 10-9 16s3 11 9 16"/></g></svg>`;
+const COURT = `<svg class="court" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><rect x="70" y="0" width="60" height="90"/><circle cx="100" cy="90" r="30"/><path d="M20 0v40a80 80 0 0 0 160 0V0"/><circle cx="100" cy="200" r="34"/><path d="M0 200h200"/></svg>`;
+const CHECK = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>`;
+const CHEV = `<svg class="chev" width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>`;
+const ICONS = {
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>`,
+  cal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+  board: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9 4v16"/></svg>`,
+  team: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.2 5 2.4 5 5.8"/></svg>`,
+};
+
+/* ===== State ===== */
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
+const S = { me: null, tab: "home", calFilter: "upcoming", boardFilter: "upcoming", sheet: null, assign: {}, rides: {}, db: null, dbState: "loading", readOnly: false, draftSeats: 3 };
+S.me = PLAYERS.includes(store.get("rm2.me")) ? store.get("rm2.me") : null;
+S.tab = ["home", "board", "cal", "team"].includes(store.get("rm2.tab")) ? store.get("rm2.tab") : "home";
+
+const itemsFor = m => m.home ? ITEMS : ITEMS.filter(i => i.k === "lavage");
+function task(m, k) {
+  const d = S.assign[`${m.id}__${k}`];
+  if (d && typeof d.who === "string") return { who: d.who, done: !!d.done, when: d.when || "", slot: d.slot || "" };
+  return { who: m.a[k] || "", done: isPast(m), when: "", slot: "" };
+}
+function ridesFor(m) {
+  const all = Object.values(S.rides).filter(r => r.m === m.id);
+  const drivers = all.filter(r => r.role === "driver");
+  const names = new Set(drivers.map(d => d.who));
+  const passengers = all.filter(r => r.role === "passenger" && names.has(r.car));
+  return { drivers, passengers };
+}
+function myRide(m) {
+  const { drivers, passengers } = ridesFor(m);
+  return drivers.find(d => d.who === S.me) || passengers.find(p => p.who === S.me) || null;
+}
+
+/* ===== Writes ===== */
+function canWrite() {
+  if (!S.db) { toast("Connecte-toi à Claude pour enregistrer tes choix."); return false; }
+  if (S.readOnly) { toast("Accès en lecture seule : demande l'accès Contributeur."); return false; }
+  return true;
+}
+function writeFailed(e) {
+  if (e && e.code === "invalid_argument") { S.readOnly = true; toast("Accès en lecture seule : demande l'accès Contributeur."); }
+  else if (e && e.code === "quota_exceeded") toast("Espace de stockage plein. Préviens l'organisateur.");
+  else toast("Pas enregistré. Vérifie ta connexion et réessaie.");
+}
+async function setTask(m, k, patch) {
+  if (!canWrite()) return render();
+  const id = `${m.id}__${k}`;
+  const next = { ...task(m, k), ...patch };
+  const prev = S.assign[id];
+  if (patch.who !== undefined && patch.who !== task(m, k).who) { next.when = ""; next.slot = ""; }
+  S.assign[id] = { m: m.id, k, who: next.who, done: next.done, when: next.when, slot: next.slot, by: S.me };
+  render();
+  try { await S.db.collection("assign").doc(id).set(S.assign[id]); }
+  catch (e) { if (prev) S.assign[id] = prev; else delete S.assign[id]; render(); writeFailed(e); }
+}
+async function claim(m, k) {
+  if (!canWrite()) return render();
+  const cur = task(m, k).who;
+  if (cur === S.me) return;
+  if (cur) { toast(`Déjà pris par ${cur}`); return; }
+  const ref = S.db.collection("assign").doc(`${m.id}__${k}`);
+  try {
+    const lease = await ref.acquire({ holder: `${slug(S.me)}-${Math.random().toString(36).slice(2, 8)}`, ttlMs: 5000 });
+    if (!lease.acquired) { toast("Quelqu'un le prend en ce moment. Réessaie dans un instant."); return; }
+    const snap = await ref.get();
+    const d = snap.exists ? snap.data() : null;
+    const who = d && typeof d.who === "string" ? d.who : (m.a[k] || "");
+    if (who && who !== S.me) { toast(`Trop tard : ${who} l'a pris`); return; }
+    await setTask(m, k, { who: S.me, done: false });
+    toast(`C'est noté : ${(ITEMS.find(i => i.k === k).short || "")} pour ${m.opp}`);
+  } catch (e) { writeFailed(e); }
+}
+function release(m, k) {
+  if (task(m, k).who !== S.me) return;
+  setTask(m, k, { who: "", done: false });
+  toast("Poste libéré");
+}
+async function setRide(m, data) {
+  if (!canWrite()) return render();
+  const id = `${m.id}__${slug(S.me)}`;
+  const prev = S.rides[id];
+  if (data) S.rides[id] = { m: m.id, who: S.me, ...data }; else delete S.rides[id];
+  render();
+  try {
+    const ref = S.db.collection("rides").doc(id);
+    if (data) await ref.set(S.rides[id]); else await ref.delete();
+  } catch (e) { if (prev) S.rides[id] = prev; else delete S.rides[id]; render(); writeFailed(e); }
+}
+
+const SLOTS = ["Matin", "Midi", "Après-midi", "Soir"];
+const planText = t => t.when ? `${fmt(t.when, { weekday: "short", day: "numeric", month: "short" })}${t.slot ? " · " + t.slot.toLowerCase() : ""}` : "";
+async function setPlan(m, keys, when, slot) {
+  for (const k of keys) await setTask(m, k, { when, slot });
+  if (when) toast(`Prévu ${planText({ when, slot })}`);
+}
+function planForm(m, keys, idp) {
+  const ts = keys.map(k => task(m, k));
+  const t = ts.find(x => x.when) || ts[0] || {};
+  const lav = keys.length === 1 && keys[0] === "lavage";
+  const min = todayISO();
+  const max = lav ? "" : m.id;
+  return `<div class="plan ${t.when ? "" : "empty"}" data-plan="${m.id}|${keys.join(",")}">
+    <label for="${idp}-d">${lav ? "Je lave le" : "J'achète le"}</label>
+    <input type="date" id="${idp}-d" value="${t.when || ""}" min="${min}" ${max ? `max="${max}"` : ""} aria-label="Date prévue">
+    <select id="${idp}-s" aria-label="Moment de la journée"><option value="">Moment…</option>${SLOTS.map(x => `<option ${x === t.slot ? "selected" : ""}>${x}</option>`).join("")}</select>
+  </div>`;
+}
+
+/* ===== Actions for the signed-in player ===== */
+function myActions() {
+  const out = [];
+  for (const m of MATCHES) {
+    if (isPast(m)) continue;
+    const items = itemsFor(m).filter(i => task(m, i.k).who === S.me);
+    const pending = items.filter(i => !task(m, i.k).done);
+    if (pending.length) out.push({ type: "tasks", m, items, pending });
+    if (!m.home && daysUntil(m.id) <= 14 && !myRide(m)) out.push({ type: "ride", m });
+  }
+  return out;
+}
+const nextMatch = () => MATCHES.find(m => !isPast(m));
+
+/* ===== Render ===== */
+function render() {
+  const app = $("#app");
+  if (!S.me) { app.innerHTML = renderLogin(); bindLogin(); renderSheet(); return; }
+  const body = S.tab === "home" ? renderHome() : S.tab === "board" ? renderBoard() : S.tab === "cal" ? renderCal() : renderTeam();
+  app.innerHTML = `
+    <div class="wrap">
+      <header class="top">
+        <div class="brand">${BALL}<div class="brand-name">RM2 <span>Vestiaire</span></div></div>
+        <button class="me" id="switch" title="Changer de joueur">${jersey(S.me)}<b>${esc(S.me)}</b></button>
+      </header>
+      <div class="stack">
+        ${S.dbState === "off" ? `<div class="banner">Mode consultation : connecte-toi à Claude avec ton compte pour réserver un poste ou une place en voiture.</div>` : ""}
+        ${body}
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Navigation"><div class="tabs-inner">
+      ${[["home", "Accueil"], ["board", "Tableau"], ["cal", "Calendrier"], ["team", "Équipe"]].map(([k, l]) => `<button data-tab="${k}" class="${S.tab === k ? "on" : ""}" ${S.tab === k ? 'aria-current="page"' : ""}>${ICONS[k]}${l}</button>`).join("")}
+    </div></nav>`;
+  bindMain();
+  renderSheet();
+}
+
+function renderLogin() {
+  return `<div class="wrap"><div class="login">
+    <div class="brand">${BALL}<div class="brand-name">RM2 <span>Vestiaire</span></div></div>
+    <div style="display:grid;gap:10px">
+      <h1>Qui est dans le vestiaire&nbsp;?</h1>
+      <p>Choisis ton nom. L'appli te dit ensuite ce que tu dois apporter, laver ou conduire pour le prochain match.</p>
+    </div>
+    <div class="roster">
+      ${PLAYERS.map(p => `<button class="pick" data-pick="${esc(p)}">${jersey(p)}<b>${esc(p)}</b><small>${countFor(p)}</small></button>`).join("")}
+    </div>
+  </div></div>`;
+}
+function countFor(p) {
+  const n = MATCHES.filter(m => !isPast(m)).reduce((s, m) => s + itemsFor(m).filter(i => { const t = task(m, i.k); return t.who === p && !t.done; }).length, 0);
+  return n ? `${n} mission${n > 1 ? "s" : ""}` : "Libre";
+}
+function bindLogin() {
+  document.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { S.me = b.dataset.pick; store.set("rm2.me", S.me); S.tab = "home"; render(); window.scrollTo(0, 0); });
+}
+
+function renderHero(a) {
+  const m = a.m;
+  if (a.type === "ride") {
+    const { drivers, passengers } = ridesFor(m);
+    return `<section class="hero" aria-label="Ta prochaine mission">${COURT}
+      <div class="hero-top"><div><div class="label">Ta prochaine mission</div><div class="clock">${countdownLong(m.id)}<small>${longDate(m.id)}</small></div></div></div>
+      <div><h2>Trouve ta voiture pour ${esc(m.opp)}</h2><div class="sub">${drivers.length ? "Monte dans une voiture proposée, ou propose la tienne." : "Aucune voiture proposée pour l'instant. Tu peux conduire ?"}</div></div>
+      ${drivers.length ? `<ul class="todo">${drivers.map(d => { const left = (d.seats || 0) - passengers.filter(p => p.car === d.who).length;
+        return `<li><span class="owner">${jersey(d.who)}</span><span class="t">Voiture de ${esc(d.who)}<br><span class="p">${left > 0 ? `${left} place${left > 1 ? "s" : ""} libre${left > 1 ? "s" : ""}` : "Complet"}</span></span>${left > 0 ? `<button class="btn small" data-joinm="${m.id}|${esc(d.who)}">Je monte</button>` : ""}</li>`; }).join("")}</ul>` : ""}
+      <div class="hero-actions"><button class="btn ${drivers.length ? "ghost small" : ""}" data-open="${m.id}">${drivers.length ? "Je conduis aussi" : "Proposer ma voiture"}</button></div>
+    </section>`;
+  }
+  const food = a.items.filter(i => i.k !== "lavage");
+  const owe = food.reduce((s, i) => s + i.price, 0);
+  const onlyLavage = a.items.length === 1 && a.items[0].k === "lavage";
+  const plan = a.pending.map(i => task(m, i.k)).find(t => t.when);
+  const clockISO = plan && daysUntil(plan.when) >= 0 ? plan.when : m.id;
+  const clockSub = plan ? `Prévu ${planText(plan)} · match ${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })}` : longDate(m.id);
+  const title = onlyLavage ? "Lavage des maillots" : food.length && a.items.some(i => i.k === "lavage") ? `Courses et maillots · ${m.opp}` : `Courses pour ${m.opp}`;
+  const sub = onlyLavage
+    ? `Après le match ${vs(m)} : récupère le sac de maillots, lave-le et rapporte-le au match suivant.`
+    : `Match ${where(m)} ${vs(m)}. Apporte ta part du repas d'après-match.`;
+  return `<section class="hero" aria-label="Ta prochaine mission">${COURT}
+    <div class="hero-top"><div><div class="label">Ta prochaine mission</div><div class="clock">${countdownLong(clockISO)}<small>${esc(clockSub)}</small></div></div></div>
+    <div><h2>${esc(title)}</h2><div class="sub">${esc(sub)}</div></div>
+    <ul class="todo">
+      ${a.items.map(i => { const t = task(m, i.k); return `<li class="${t.done ? "done" : ""}">
+        <button class="tick ${t.done ? "on" : ""}" data-tick="${m.id}|${i.k}" aria-pressed="${t.done}" aria-label="${t.done ? "Marquer à faire" : "Marquer fait"} : ${esc(i.label)}">${CHECK}</button>
+        <span class="t">${esc(i.label)}</span>${i.price ? `<span class="p num">≈ ${euro(i.price)}</span>` : ""}</li>`; }).join("")}
+    </ul>
+    ${groupPlans(m, a.pending)}
+    <div class="hero-actions" style="align-items:center;justify-content:space-between">
+      ${owe ? `<div class="money">À avancer : <b class="num">≈ ${euro(owe)}</b></div>` : "<span></span>"}
+      <button class="btn ghost small" data-open="${m.id}">Voir le match</button>
+    </div>
+  </section>`;
+}
+
+function groupPlans(m, pending) {
+  const food = pending.filter(i => i.k !== "lavage").map(i => i.k);
+  const lav = pending.filter(i => i.k === "lavage").map(i => i.k);
+  return [food.length ? planForm(m, food, "hp-f") : "", lav.length ? planForm(m, lav, "hp-l") : ""].join("");
+}
+function renderHome() {
+  const acts = myActions();
+  const nm = nextMatch();
+  let html = "";
+  if (acts.length) html += renderHero(acts[0]);
+  else html += `<section class="hero" aria-label="Ta prochaine mission">${COURT}
+    <div class="allclear"><div class="label">Ta prochaine mission</div>
+    <h2>Rien à faire pour l'instant</h2>
+    <div class="sub">${nm ? `Tu es à jour. Il reste des postes libres : donne un coup de main à l'équipe.` : "La saison est terminée. Merci pour ton aide !"}</div></div>
+  </section>`;
+
+  if (nm) {
+    const filled = nm.home ? itemsFor(nm).filter(i => task(nm, i.k).who).length : null;
+    const r = ridesFor(nm);
+    html += `<div class="section"><div class="section-head"><h3>Prochain match</h3><span class="label">${countdownLong(nm.id)}</span></div>${matchCard(nm)}</div>`;
+    const free = itemsFor(nm).filter(i => !task(nm, i.k).who);
+    const homeNext = MATCHES.find(m => !isPast(m) && m.home);
+    const target = free.length ? nm : homeNext;
+    const freeT = target ? itemsFor(target).filter(i => !task(target, i.k).who) : [];
+    if (freeT.length) {
+      html += `<div class="section"><div class="section-head"><h3>Postes libres</h3><span class="label">${esc(target.opp)} · ${fmt(target.id, { day: "numeric", month: "short" })}</span></div>
+        <div class="free">${freeT.map(i => `<button class="chip" data-take="${target.id}|${i.k}"><span class="plus">+</span>${esc(i.short || i.label)}${i.price ? ` <span class="muted num">${euro(i.price)}</span>` : ""}</button>`).join("")}</div>
+        <div class="note">Touche un poste pour le prendre.</div></div>`;
+    }
+  }
+  const rest = acts.slice(1, 6);
+  if (rest.length) {
+    html += `<div class="section"><div class="section-head"><h3>Ensuite</h3><span class="label">${acts.length - 1} à venir</span></div><div class="next-list">
+      ${rest.map(a => `<button class="card next-item" data-open="${a.m.id}"><span class="when">${countdown(a.m.id)}</span><span class="what">
+        <b>${a.type === "ride" ? "Trajet à organiser" : a.pending.map(i => i.short || i.label).join(", ")}</b>
+        <span>${fmt(a.m.id, { weekday: "short", day: "numeric", month: "short" })} · ${esc(vs(a.m))}${a.type === "tasks" ? (() => { const t = a.pending.map(i => task(a.m, i.k)).find(x => x.when); return t ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ` · <span style="color:var(--orange-ink)">date à fixer</span>`; })() : ""}</span></span>${CHEV}</button>`).join("")}
+    </div></div>`;
+  }
+  return html;
+}
+
+function matchCard(m) {
+  const past = isPast(m);
+  const items = itemsFor(m);
+  const mine = items.filter(i => task(m, i.k).who === S.me);
+  let meta = `<span class="pill ${m.home ? "dom" : "ext"}">${m.home ? "Dom" : "Ext"}</span>`;
+  if (mine.length) meta += `<span class="pill me">${mine.length === 1 ? (mine[0].short || mine[0].label) : `${mine.length} postes`}</span>`;
+  let extra = "";
+  if (m.home) {
+    const filled = items.filter(i => task(m, i.k).who).length;
+    meta += `<span class="num">${filled}/${items.length} postes pris</span>`;
+    extra = `<div class="meter"><i style="width:${Math.round(filled / items.length * 100)}%"></i></div>`;
+  } else {
+    const { drivers, passengers } = ridesFor(m);
+    const seats = drivers.reduce((s, d) => s + (d.seats || 0), 0);
+    meta += drivers.length ? `<span class="num">${drivers.length} voiture${drivers.length > 1 ? "s" : ""} · ${seats - passengers.length} place${seats - passengers.length > 1 ? "s" : ""} libre${seats - passengers.length > 1 ? "s" : ""}</span>` : past ? "" : `<span class="pill warn">Aucune voiture</span>`;
+    if (!task(m, "lavage").who && !past) meta += `<span>Maillots : personne</span>`;
+  }
+  if (past) meta += `<span>Joué</span>`;
+  return `<button class="card match ${past ? "past" : ""}" data-open="${m.id}">
+    <div class="date"><div class="d">${fmt(m.id, { day: "numeric" })}</div><div class="m">${fmt(m.id, { month: "short" }).replace(".", "")}</div></div>
+    <div class="body"><div class="opp">${m.home ? "" : "@ "}${esc(m.opp)}</div><div class="meta">${meta}</div>${extra}</div>${CHEV}</button>`;
+}
+
+function missingIn(m) { return itemsFor(m).filter(i => !task(m, i.k).who).length + (!m.home && !ridesFor(m).drivers.length ? 1 : 0); }
+function renderBoard() {
+  const f = S.boardFilter;
+  const list = f === "all" ? MATCHES : MATCHES.filter(m => !isPast(m));
+  const upcoming = MATCHES.filter(m => !isPast(m));
+  const soon = upcoming.slice(0, 4);
+  const holes = soon.reduce((s, m) => s + itemsFor(m).filter(i => !task(m, i.k).who).length, 0);
+  const cols = ITEMS;
+  const head = `<tr><th class="mcol">Match</th>${cols.map(i => `<th title="${esc(i.label)}">${esc(i.short)}</th>`).join("")}<th title="voitures · places libres">Voit.</th><th>Manque</th></tr>`;
+  const rows = list.map(m => {
+    const past = isPast(m);
+    const cells = cols.map(i => {
+      if (!m.home && i.k !== "lavage") return `<td class="na">·</td>`;
+      const t = task(m, i.k);
+      if (!t.who) return `<td>${past ? `<span class="muted">—</span>` : `<button class="cell free" data-take="${m.id}|${i.k}" aria-label="Prendre ${esc(i.label)} pour ${esc(m.opp)}">+</button>`}</td>`;
+      const mine = t.who === S.me;
+      return `<td><button class="cell ${mine ? "mine" : ""} ${t.done ? "done" : ""}" data-open="${m.id}" title="${esc(i.label)} : ${esc(t.who)}">${esc(t.who)}</button></td>`;
+    }).join("");
+    let car = `<td class="na">·</td>`;
+    if (!m.home) { const r = ridesFor(m); const n = r.drivers.length; const left = r.drivers.reduce((s, d) => s + (d.seats || 0), 0) - r.passengers.length; const mine = !!myRide(m);
+      car = `<td><button class="cell ${n ? "" : "free"} ${mine ? "mine" : ""}" data-open="${m.id}" aria-label="Covoiturage ${esc(m.opp)}" title="${n} voiture(s), ${left} place(s) libre(s)">${n ? `${n}v · ${left}pl` : "+"}</button></td>`; }
+    const miss = missingIn(m);
+    return `<tr class="${past ? "past" : ""}"><td class="mcol"><button data-open="${m.id}"><b>${m.home ? "" : "@ "}${esc(m.opp)}</b><span>${fmt(m.id, { weekday: "short", day: "numeric", month: "short" })} · ${m.home ? "Dom" : "Ext"}</span></button></td>${cells}${car}<td><span class="miss ${miss ? "ko" : "ok"} num">${past ? "" : miss ? miss : "✓"}</span></td></tr>`;
+  }).join("");
+  return `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Tableau</h3><span class="label">Qui apporte quoi</span></div>
+    <div class="card alert"><b class="big ${holes ? "" : "ok"}">${holes || "✓"}</b><div>${holes ? `<b>poste${holes > 1 ? "s" : ""} encore libre${holes > 1 ? "s" : ""}</b> sur les ${soon.length} prochains matchs. Touche un <span style="color:var(--orange-ink);font-weight:700">+</span> pour le prendre.` : `<b>Tout est pris</b> pour les ${soon.length} prochains matchs. Merci l'équipe !`}</div></div>
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
+    <div class="board-wrap"><table class="board"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
+    <div class="legend"><span><i style="background:var(--orange)"></i>Moi</span><span><i style="border:1.5px dashed var(--orange)"></i>Libre</span><span>✓ fait</span><span>Voit. : voitures · places libres</span><span>· pas de repas à l'extérieur</span></div>`;
+}
+function renderCal() {
+  const f = S.calFilter;
+  let list = MATCHES;
+  if (f === "upcoming") list = MATCHES.filter(m => !isPast(m));
+  if (f === "mine") list = MATCHES.filter(m => itemsFor(m).some(i => task(m, i.k).who === S.me) || (!m.home && myRide(m)?.role === "driver"));
+  let html = `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Calendrier</h3><span class="label num">${MATCHES.length} matchs</span></div>
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["mine", "Mes matchs"], ["all", "Saison"]].map(([k, l]) => `<button role="tab" data-filter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>`;
+  if (!list.length) return html + `<div class="card" style="padding:18px" ><b>Aucun match ici.</b><div class="note">Prends un poste libre dans un match pour le retrouver dans « Mes matchs ».</div></div>`;
+  let month = "";
+  html += `<div class="list">`;
+  for (const m of list) {
+    const mo = fmt(m.id, { month: "long", year: "numeric" });
+    if (mo !== month) { month = mo; html += `<div class="month">${esc(mo)}</div>`; }
+    html += matchCard(m);
+  }
+  return html + `</div>`;
+}
+
+function renderTeam() {
+  const rows = PLAYERS.map(p => {
+    let lav = 0, meals = 0, spend = 0;
+    for (const m of MATCHES) {
+      if (task(m, "lavage").who === p) lav++;
+      const food = FOOD.filter(i => m.home && task(m, i.k).who === p);
+      if (food.length) { meals++; spend += food.reduce((s, i) => s + i.price, 0); }
+    }
+    return { p, lav, meals, spend, total: lav + meals };
+  }).sort((a, b) => b.total - a.total || b.spend - a.spend || a.p.localeCompare(b.p));
+  const max = Math.max(1, ...rows.map(r => r.total));
+  const homeCount = MATCHES.filter(m => m.home).length;
+  const allFood = MATCHES.filter(m => m.home).reduce((s, m) => s + FOOD.length, 0);
+  const filled = MATCHES.filter(m => m.home).reduce((s, m) => s + FOOD.filter(i => task(m, i.k).who).length, 0);
+  return `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Équipe</h3><span class="label">Saison 26-27</span></div>
+    <div class="stats">
+      <div class="card stat"><b>${homeCount}</b><span>matchs à domicile</span></div>
+      <div class="card stat"><b>${euro(BASKET * homeCount)}</b><span>budget repas saison</span></div>
+      <div class="card stat"><b>${Math.round(filled / allFood * 100)}%</b><span>des courses attribuées</span></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><h3>Qui a aidé</h3><div class="legend"><span><i style="background:var(--wood)"></i>Lavages</span><span><i style="background:var(--orange)"></i>Repas</span></div></div>
+      <div class="card rank">
+        ${rows.map((r, i) => `<div class="rank-row ${r.p === S.me ? "me" : ""}">
+          <span class="pos">${i + 1}</span>${jersey(r.p)}
+          <div class="who"><b>${esc(r.p)}</b><div class="bars">${r.lav ? `<i class="l" style="width:${r.lav / max * 100}%"></i>` : ""}${r.meals ? `<i class="r" style="width:${r.meals / max * 100}%"></i>` : ""}</div></div>
+          <div class="score"><b>${r.lav}</b> lav. · <b>${r.meals}</b> repas${r.spend ? `<br>≈ ${euro(r.spend)}` : ""}</div></div>`).join("")}
+      </div>
+      <div class="note">Repas = nombre de matchs où le joueur apporte au moins un article. Montants estimés au prix supermarché.</div>
+    </div>
+    <div class="section">
+      <div class="section-head"><h3>Panier d'après-match</h3><span class="label">par match à domicile</span></div>
+      <div class="card" style="overflow-x:auto"><table class="price-table"><tbody>
+        ${FOOD.map(i => `<tr><td>${esc(i.label)}</td><td>${euro(i.price)}</td></tr>`).join("")}
+        <tr class="total"><td>Total panier</td><td>${euro(BASKET)}</td></tr>
+        <tr><td>Part par joueur (3 joueurs)</td><td>${euro(BASKET / 3)}</td></tr>
+      </tbody></table></div>
+    </div>
+    <button class="btn ghost" id="logout" style="justify-self:start">Changer de joueur</button>`;
+}
+
+/* ===== Match sheet ===== */
+function renderSheet() {
+  const root = $("#sheet-root");
+  const m = MATCHES.find(x => x.id === S.sheet);
+  if (!m) { root.innerHTML = ""; document.body.style.overflow = ""; return; }
+  document.body.style.overflow = "hidden";
+  const scroll = root.querySelector(".sheet")?.scrollTop || 0;
+  const past = isPast(m);
+  const rows = itemsFor(m).map(i => {
+    const t = task(m, i.k);
+    return `<div class="row ${t.who === S.me ? "mine" : ""}">
+      <button class="tick ${t.done ? "on" : ""}" data-tick="${m.id}|${i.k}" ${t.who === S.me ? "" : "disabled"} aria-pressed="${t.done}" aria-label="${esc(i.label)} fait">${CHECK}</button>
+      <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span>
+        ${t.who === S.me && !t.done && !past ? planForm(m, [i.k], `sp-${i.k}`) : ""}</div>
+      ${!t.who ? (past ? `<span class="muted">Personne</span>` : `<button class="btn small" data-take="${m.id}|${i.k}">Je prends</button>`)
+        : `<div class="row-end"><span class="owner">${jersey(t.who)}${t.who === S.me ? "Moi" : esc(t.who)}</span>${t.who === S.me && !past && !t.done ? `<button class="link" data-release="${m.id}|${i.k}">Libérer</button>` : ""}</div>`}
+    </div>`;
+  }).join("");
+
+  let extra = "";
+  if (m.home) {
+    const shares = {};
+    FOOD.forEach(i => { const w = task(m, i.k).who; if (w) shares[w] = (shares[w] || 0) + i.price; });
+    const missing = FOOD.filter(i => !task(m, i.k).who).reduce((s, i) => s + i.price, 0);
+    extra = `<div class="section"><div class="section-head"><h3>Qui avance quoi</h3><span class="label num">Panier ${euro(BASKET)}</span></div>
+      <div class="card" style="overflow-x:auto"><table class="price-table"><tbody>
+        ${Object.entries(shares).sort((a, b) => b[1] - a[1]).map(([p, v]) => `<tr><td>${esc(p)}</td><td>≈ ${euro(v)}</td></tr>`).join("") || `<tr><td class="muted">Personne pour l'instant</td><td></td></tr>`}
+        ${missing ? `<tr class="total"><td>Encore libre</td><td>${euro(missing)}</td></tr>` : ""}
+      </tbody></table></div></div>`;
+  } else {
+    const { drivers, passengers } = ridesFor(m);
+    const mine = myRide(m);
+    const cars = drivers.map(d => {
+      const ps = passengers.filter(p => p.car === d.who);
+      const left = (d.seats || 0) - ps.length;
+      const canJoin = !past && !mine && left > 0;
+      return `<div class="card car">
+        <div class="car-top">${jersey(d.who)}<div><b>${esc(d.who)}</b><div class="note">conduit</div></div>
+          <span class="pill ${left > 0 ? "ext" : "dom"} seats-left num">${left > 0 ? `${left} place${left > 1 ? "s" : ""}` : "Complet"}</span></div>
+        <div class="seats">${ps.map(p => `<span class="seat">${jersey(p.who)}${esc(p.who)}</span>`).join("")}${Array.from({ length: Math.max(0, left) }, () => `<span class="seat empty">Libre</span>`).join("")}</div>
+        ${canJoin ? `<button class="btn small" data-join="${esc(d.who)}" style="justify-self:start">Monter avec ${esc(d.who)}</button>` : ""}
+        ${mine && mine.who === S.me && (mine.role === "driver" ? d.who === S.me : mine.car === d.who) && !past ? `<button class="btn ghost small" data-leave style="justify-self:start">${mine.role === "driver" ? "Retirer ma voiture" : "Descendre"}</button>` : ""}
+      </div>`;
+    }).join("");
+    const inCar = new Set([...drivers.map(d => d.who), ...passengers.map(p => p.who)]);
+    const without = PLAYERS.filter(p => !inCar.has(p));
+    extra = `<div class="section"><div class="section-head"><h3>Covoiturage</h3><span class="label num">${drivers.length} voiture${drivers.length > 1 ? "s" : ""}</span></div>
+      ${cars || `<div class="card" style="padding:14px"><b>Aucune voiture proposée.</b><div class="note">Tu as une voiture ? Propose-la ci-dessous.</div></div>`}
+      ${!past && !mine ? `<div class="card drive-form"><span style="font-weight:600">Je conduis, places libres :</span>
+        <span class="stepper"><button data-seat="-1" aria-label="Moins">−</button><output class="num">${S.draftSeats}</output><button data-seat="1" aria-label="Plus">+</button></span>
+        <button class="btn small" data-drive>Proposer ma voiture</button></div>` : ""}
+      ${!past ? `<div class="note">Pas encore dans une voiture : ${without.map(esc).join(", ") || "tout le monde est casé"}.</div>` : ""}
+    </div>`;
+  }
+
+  root.innerHTML = `<div class="scrim" data-close><div class="sheet" role="dialog" aria-modal="true" aria-label="Match ${esc(vs(m))}">
+    <div class="sheet-head"><span class="grab"></span><div>
+      <div class="label">${longDate(m.id)} · ${past ? "Joué" : countdownLong(m.id)}</div>
+      <h2>${m.home ? "" : "@ "}${esc(m.opp)}</h2>
+      <div style="margin-top:6px"><span class="pill ${m.home ? "dom" : "ext"}">${m.home ? "Domicile" : "Extérieur"}</span></div>
+    </div><button class="x" data-x aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+    <div class="sheet-body">
+      <div class="section"><div class="section-head"><h3>${m.home ? "Repas & maillots" : "Maillots"}</h3><span class="label">Coche quand c'est fait</span></div>
+        <div class="card rows">${rows}</div></div>
+      ${extra}
+    </div></div></div>`;
+  const sh = root.querySelector(".sheet");
+  sh.scrollTop = scroll;
+  bindSheet(root, m);
+}
+
+/* ===== Events ===== */
+function bindCommon(scope) {
+  scope.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { S.sheet = b.dataset.open; renderSheet(); });
+  scope.querySelectorAll("[data-tick]").forEach(b => b.onclick = e => { e.stopPropagation(); const [id, k] = b.dataset.tick.split("|"); const m = MATCHES.find(x => x.id === id); const t = task(m, k); if (t.who === S.me) { setTask(m, k, { done: !t.done }); if (!t.done) toast("Bien joué !"); } });
+  scope.querySelectorAll("[data-plan]").forEach(w => {
+    const [id, ks] = w.dataset.plan.split("|"); const m = MATCHES.find(x => x.id === id);
+    const d = w.querySelector("input"), sl = w.querySelector("select");
+    const save = () => setPlan(m, ks.split(","), d.value, sl.value);
+    d.onchange = save; sl.onchange = save;
+    w.onclick = e => e.stopPropagation();
+  });
+  scope.querySelectorAll("[data-take]").forEach(b => b.onclick = e => { e.stopPropagation(); const [id, k] = b.dataset.take.split("|"); const m = MATCHES.find(x => x.id === id); claim(m, k); });
+  scope.querySelectorAll("[data-joinm]").forEach(b => b.onclick = e => { e.stopPropagation(); const [id, who] = b.dataset.joinm.split("|"); setRide(MATCHES.find(x => x.id === id), { role: "passenger", car: who }); toast(`Place réservée avec ${who}`); });
+  scope.querySelectorAll("[data-release]").forEach(b => b.onclick = e => { e.stopPropagation(); const [id, k] = b.dataset.release.split("|"); release(MATCHES.find(x => x.id === id), k); });
+}
+function bindMain() {
+  bindCommon($("#app"));
+  $("#switch").onclick = logout;
+  $("#logout") && ($("#logout").onclick = logout);
+  document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; store.set("rm2.tab", S.tab); render(); window.scrollTo(0, 0); });
+  document.querySelectorAll("[data-bfilter]").forEach(b => b.onclick = () => { S.boardFilter = b.dataset.bfilter; render(); });
+  document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.calFilter = b.dataset.filter; render(); });
+}
+function logout() { S.me = null; S.sheet = null; store.set("rm2.me", null); render(); window.scrollTo(0, 0); }
+function bindSheet(root, m) {
+  bindCommon(root);
+  const close = () => { S.sheet = null; renderSheet(); };
+  root.querySelector("[data-close]").onclick = e => { if (e.target === e.currentTarget) close(); };
+  root.querySelector("[data-x]").onclick = close;
+  root.querySelectorAll("[data-seat]").forEach(b => b.onclick = () => { S.draftSeats = Math.min(8, Math.max(1, S.draftSeats + Number(b.dataset.seat))); renderSheet(); });
+  root.querySelector("[data-drive]") && (root.querySelector("[data-drive]").onclick = () => { setRide(m, { role: "driver", seats: S.draftSeats }); toast("Voiture proposée, merci !"); });
+  root.querySelectorAll("[data-join]").forEach(b => b.onclick = () => { setRide(m, { role: "passenger", car: b.dataset.join }); toast(`Place réservée avec ${b.dataset.join}`); });
+  root.querySelector("[data-leave]") && (root.querySelector("[data-leave]").onclick = () => setRide(m, null));
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && S.sheet) { S.sheet = null; renderSheet(); } });
+
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+
+/* ===== Shared data ===== */
+render();
+(async () => {
+  const db = window.claude?.use ? await window.claude.use("db") : null;
+  if (!db) { S.dbState = "off"; render(); return; }
+  S.db = db; S.dbState = "on";
+  const toMap = snap => { const o = {}; snap.docs.forEach(d => { if (d.exists) o[d.id] = d.data(); }); return o; };
+  const onErr = e => { if (e && e.code === "revoked") { S.db = null; S.dbState = "off"; render(); } };
+  db.collection("assign").limit(1000).onSnapshot(s => { S.assign = toMap(s); render(); }, onErr);
+  db.collection("rides").limit(1000).onSnapshot(s => { S.rides = toMap(s); render(); }, onErr);
+})();
+</script>
