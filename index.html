@@ -873,7 +873,14 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = fal
 
 /* ===== Shared data ===== */
 /* Public website: paste the Firebase web config here (Firebase console > Project settings > Your apps). */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  "apiKey": "AIzaSyCamVbNXOF8bTUfxnXQVBKHKmDitC-2wR4",
+  "authDomain": "r2n-hnb.firebaseapp.com",
+  "projectId": "r2n-hnb",
+  "storageBucket": "r2n-hnb.firebasestorage.app",
+  "messagingSenderId": "51784790689",
+  "appId": "1:51784790689:web:7622d1d208aea80f9ab6e0"
+};
 const FIREBASE_SDK = "https://www.gstatic.com/firebasejs/10.12.2/";
 const loadScript = src => new Promise((ok, ko) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = ko; document.head.appendChild(el); });
 async function connectFirebase() {

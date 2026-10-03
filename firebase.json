@@ -1,0 +1,3 @@
+{
+  "firestore": { "rules": "firestore.rules", "location": "europe-west1" }
+}
