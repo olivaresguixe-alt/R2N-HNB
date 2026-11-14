@@ -741,7 +741,7 @@ function renderBoard() {
   }).join("");
   return `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Tableau</h3><span class="label">Qui apporte quoi</span></div>
     <div class="card alert"><b class="big ${holes ? "" : "ok"}">${holes || "✓"}</b><div>${holes ? `<b>poste${holes > 1 ? "s" : ""} encore libre${holes > 1 ? "s" : ""}</b> sur les ${soon.length} prochains matchs. Touche un <span style="color:var(--orange-ink);font-weight:700">+</span> pour le prendre.` : `<b>Tout est pris</b> pour les ${soon.length} prochains matchs. Merci l'équipe !`}</div></div>
-    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison (matchs passés inclus)"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison 26-27"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
     <div class="board-wrap"><table class="board"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
     <div class="legend"><span><i style="background:var(--orange)"></i>Moi</span><span><i style="border:1.5px dashed var(--orange)"></i>Libre</span><span>✓ fait</span><span>Voit. : voitures · places libres</span><span>Lignes grisées : matchs à l'extérieur (maillots et voitures seulement)</span></div>`;
 }
@@ -751,7 +751,7 @@ function renderCal() {
   if (f === "upcoming") list = MATCHES.filter(m => !isPast(m));
   if (f === "mine") list = MATCHES.filter(m => itemsFor(m).some(i => task(m, i.k).who === S.me) || (!m.home && myRide(m)?.role === "driver"));
   let html = `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Calendrier</h3><button class="btn small" data-new>+ Ajouter un match</button></div>
-    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["mine", "Mes matchs"], ["all", `Saison · ${MATCHES.length}`]].map(([k, l]) => `<button role="tab" data-filter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>`;
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["mine", "Mes matchs"], ["all", "Saison 26-27"]].map(([k, l]) => `<button role="tab" data-filter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>`;
   if (!list.length) return html + `<div class="card" style="padding:18px" ><b>Aucun match ici.</b><div class="note">Prends un poste libre dans un match pour le retrouver dans « Mes matchs ».</div></div>`;
   let month = "";
   html += `<div class="list">`;
