@@ -139,7 +139,7 @@ button.match:hover { border-color: var(--orange); }
 .pill.warn { background: var(--orange); color: #fff; }
 .meter { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .meter i { display: block; height: 100%; background: var(--orange); border-radius: 3px; }
-.match.past { opacity: .5; }
+.match.past { opacity: .65; }
 .chev { color: var(--muted); flex: none; }
 .month { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; font-size: 20px; color: var(--muted); margin-top: 6px; }
 .list { display: grid; gap: 8px; }
@@ -202,6 +202,11 @@ button.match:hover { border-color: var(--orange); }
 .sheet-head h2 { font-family: var(--f-display); font-weight: 900; font-size: 34px; line-height: .95; text-transform: uppercase; margin-top: 4px; }
 .sheet-head .x { margin-left: auto; flex: none; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
 .sheet-body { display: grid; gap: 20px; }
+.sheet.narrow { max-width: 480px; }
+.newform { display: grid; gap: 8px; padding: 16px; }
+.newform label, .newform .lbl { font-weight: 600; font-size: 14px; margin-top: 6px; }
+.newform input { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); padding: 10px 12px; font-size: 16px; min-width: 0; width: 100%; }
+.newform .btn { margin-top: 8px; }
 .rows { display: grid; }
 .row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
 .row:first-child { border-top: 0; }
@@ -226,7 +231,7 @@ button.match:hover { border-color: var(--orange); }
 .board .mcol > div { display: grid; }
 .board .mcol b { font-family: var(--f-label); font-weight: 700; font-size: 16px; line-height: 1.1; }
 .board .mcol span { font-size: 12px; color: var(--muted); }
-.board tr.past td { opacity: .45; }
+.board tr.past td { opacity: .6; }
 .board tr:last-child td { border-bottom: 0; }
 .cell { width: 100%; min-width: 66px; border-radius: 8px; padding: 7px 4px; font-family: var(--f-label); font-weight: 700; font-size: 14px; border: 1px solid transparent; background: var(--surface-2); }
 .cell.free { background: transparent; border: 1.5px dashed var(--orange); color: var(--orange-ink); font-size: 18px; line-height: 1; padding: 5px 4px; }
@@ -340,7 +345,7 @@ const ITEMS = [
 ];
 const FOOD = ITEMS.filter(i => i.k !== "lavage");
 const BASKET = FOOD.reduce((s, i) => s + i.price, 0);
-const MATCHES = [
+const BASE_MATCHES = [
   ["2026-08-28", 1, "Saint Jory", { lavage: "Thibaud", dinde: "Mathieu", emmental: "Max", rillette: "Mathieu", soft: "Max", chips: "Quentin", baguettes: "Mathieu", pizzas: "Max" }],
   ["2026-09-03", 1, "Verfeil", { lavage: "Lakbir", chips: "Quentin", pizzas: "Thibaud" }],
   ["2026-09-11", 1, "Labège", { lavage: "Yassin", chips: "Quentin" }],
@@ -367,6 +372,13 @@ const MATCHES = [
   ["2027-04-24", 0, "Launaguet", {}],
   ["2027-05-01", 0, "Moissac", { lavage: "Nico" }],
 ].map(([id, home, opp, a]) => ({ id, home: !!home, opp, a }));
+let MATCHES = BASE_MATCHES.slice();
+function rebuildMatches() {
+  const extra = Object.entries(S.extra)
+    .filter(([id, d]) => /^\d{4}-\d{2}-\d{2}/.test(id) && d && typeof d.opp === "string" && !BASE_MATCHES.some(b => b.id === id))
+    .map(([id, d]) => ({ id, home: !!d.home, opp: d.opp, a: {}, custom: true }));
+  MATCHES = BASE_MATCHES.concat(extra).sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+}
 
 /* ===== Helpers ===== */
 const $ = s => document.querySelector(s);
@@ -404,7 +416,7 @@ const ICONS = {
 
 /* ===== State ===== */
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
-const S = { me: null, tab: "home", calFilter: "upcoming", boardFilter: "upcoming", sheet: null, assign: {}, rides: {}, db: null, dbState: "loading", readOnly: false, draftSeats: 3 };
+const S = { me: null, tab: "home", calFilter: "upcoming", boardFilter: "upcoming", sheet: null, assign: {}, rides: {}, extra: {}, draft: { date: "", opp: "", home: true }, confirmDel: false, db: null, dbState: "loading", readOnly: false, draftSeats: 3 };
 S.me = PLAYERS.includes(store.get("rm2.me")) ? store.get("rm2.me") : null;
 S.tab = ["home", "board", "cal", "team"].includes(store.get("rm2.tab")) ? store.get("rm2.tab") : "home";
 
@@ -496,6 +508,33 @@ async function setRide(m, data) {
   } catch (e) { if (prev) S.rides[id] = prev; else delete S.rides[id]; render(); writeFailed(e); }
 }
 
+async function addMatch() {
+  const date = S.draft.date, opp = S.draft.opp.trim().slice(0, 40);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast("Choisis la date du match."); return; }
+  if (!opp) { toast("Indique l'adversaire."); return; }
+  if (!canWrite()) return;
+  let id = date, n = 2;
+  while (MATCHES.some(m => m.id === id)) id = `${date}-${n++}`;
+  const data = { date, home: !!S.draft.home, opp, by: S.me };
+  S.extra[id] = data; rebuildMatches();
+  S.draft = { date: "", opp: "", home: true }; S.sheet = id; render();
+  try { await S.db.collection("matches").doc(id).set(data); toast("Match ajouté"); }
+  catch (e) { delete S.extra[id]; rebuildMatches(); S.sheet = null; render(); writeFailed(e); }
+}
+async function deleteMatch(m) {
+  if (!m.custom || !canWrite()) return;
+  const prev = S.extra[m.id];
+  const taskIds = Object.keys(S.assign).filter(id => id.startsWith(m.id + "__"));
+  const rideIds = Object.keys(S.rides).filter(id => id.startsWith(m.id + "__"));
+  delete S.extra[m.id]; rebuildMatches(); S.sheet = null; S.confirmDel = false; render();
+  try {
+    await S.db.collection("matches").doc(m.id).delete();
+    for (const id of taskIds) await S.db.collection("assign").doc(id).delete();
+    for (const id of rideIds) await S.db.collection("rides").doc(id).delete();
+    toast("Match supprimé");
+  } catch (e) { S.extra[m.id] = prev; rebuildMatches(); render(); writeFailed(e); }
+}
+
 const SLOTS = ["Matin", "Midi", "Après-midi", "Soir"];
 const planText = t => t.when ? `${fmt(t.when, { weekday: "short", day: "numeric", month: "short" })}${t.slot ? " · " + t.slot.toLowerCase() : ""}` : "";
 async function setPlan(m, keys, when, slot) {
@@ -507,7 +546,7 @@ function planForm(m, keys, idp) {
   const t = ts.find(x => x.when) || ts[0] || {};
   const lav = keys.length === 1 && keys[0] === "lavage";
   const min = todayISO();
-  const max = lav ? "" : m.id;
+  const max = lav ? "" : m.id.slice(0, 10);
   return `<div class="plan ${t.when ? "" : "empty"}" data-plan="${m.id}|${keys.join(",")}">
     <label for="${idp}-d">${lav ? "Je lave le" : "J'achète le"}</label>
     <input type="date" id="${idp}-d" value="${t.when || ""}" min="${min}" ${max ? `max="${max}"` : ""} aria-label="Date prévue">
@@ -690,7 +729,7 @@ function renderBoard() {
     const cells = cols.map(i => {
       if (!m.home && i.k !== "lavage") return `<td class="na">·</td>`;
       const t = task(m, i.k);
-      if (!t.who) return `<td>${past ? `<span class="muted">—</span>` : `<button class="cell free" data-take="${m.id}|${i.k}" aria-label="Prendre ${esc(i.label)} pour ${esc(m.opp)}">+</button>`}</td>`;
+      if (!t.who) return `<td><button class="cell free" data-take="${m.id}|${i.k}" aria-label="Prendre ${esc(i.label)} pour ${esc(m.opp)}">+</button></td>`;
       const mine = t.who === S.me;
       return `<td><button class="cell ${mine ? "mine" : ""} ${t.done ? "done" : ""}" data-open="${m.id}" title="${esc(i.label)} : ${esc(t.who)}">${esc(t.who)}</button></td>`;
     }).join("");
@@ -702,7 +741,7 @@ function renderBoard() {
   }).join("");
   return `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Tableau</h3><span class="label">Qui apporte quoi</span></div>
     <div class="card alert"><b class="big ${holes ? "" : "ok"}">${holes || "✓"}</b><div>${holes ? `<b>poste${holes > 1 ? "s" : ""} encore libre${holes > 1 ? "s" : ""}</b> sur les ${soon.length} prochains matchs. Touche un <span style="color:var(--orange-ink);font-weight:700">+</span> pour le prendre.` : `<b>Tout est pris</b> pour les ${soon.length} prochains matchs. Merci l'équipe !`}</div></div>
-    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["all", "Saison (matchs passés inclus)"]].map(([k, l]) => `<button role="tab" data-bfilter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>
     <div class="board-wrap"><table class="board"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
     <div class="legend"><span><i style="background:var(--orange)"></i>Moi</span><span><i style="border:1.5px dashed var(--orange)"></i>Libre</span><span>✓ fait</span><span>Voit. : voitures · places libres</span><span>Lignes grisées : matchs à l'extérieur (maillots et voitures seulement)</span></div>`;
 }
@@ -711,8 +750,8 @@ function renderCal() {
   let list = MATCHES;
   if (f === "upcoming") list = MATCHES.filter(m => !isPast(m));
   if (f === "mine") list = MATCHES.filter(m => itemsFor(m).some(i => task(m, i.k).who === S.me) || (!m.home && myRide(m)?.role === "driver"));
-  let html = `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Calendrier</h3><span class="label num">${MATCHES.length} matchs</span></div>
-    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["mine", "Mes matchs"], ["all", "Saison"]].map(([k, l]) => `<button role="tab" data-filter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>`;
+  let html = `<div class="section-head"><h3 style="font-family:var(--f-display);font-weight:900;font-size:34px;text-transform:uppercase">Calendrier</h3><button class="btn small" data-new>+ Ajouter un match</button></div>
+    <div class="seg" role="tablist">${[["upcoming", "À venir"], ["mine", "Mes matchs"], ["all", `Saison · ${MATCHES.length}`]].map(([k, l]) => `<button role="tab" data-filter="${k}" class="${f === k ? "on" : ""}" aria-selected="${f === k}">${l}</button>`).join("")}</div>`;
   if (!list.length) return html + `<div class="card" style="padding:18px" ><b>Aucun match ici.</b><div class="note">Prends un poste libre dans un match pour le retrouver dans « Mes matchs ».</div></div>`;
   let month = "";
   html += `<div class="list">`;
@@ -768,6 +807,7 @@ function renderTeam() {
 /* ===== Match sheet ===== */
 function renderSheet() {
   const root = $("#sheet-root");
+  if (S.sheet === "new") return renderNewSheet(root);
   const m = MATCHES.find(x => x.id === S.sheet);
   if (!m) { root.innerHTML = ""; document.body.style.overflow = ""; return; }
   document.body.style.overflow = "hidden";
@@ -778,8 +818,8 @@ function renderSheet() {
     return `<div class="row ${t.who === S.me ? "mine" : ""}">
       <button class="tick ${t.done ? "on" : ""}" data-tick="${m.id}|${i.k}" ${t.who === S.me ? "" : "disabled"} aria-pressed="${t.done}" aria-label="${esc(i.label)} fait">${CHECK}</button>
       <div class="it"><b>${esc(i.label)}</b><span>${i.k === "lavage" ? "Après le match, sac rendu au match suivant" : `≈ ${euro(i.price)}`}${t.done ? " · fait" : t.when && i.k !== "lavage" ? ` · <span class="planned">prévu ${esc(planText(t))}</span>` : ""}</span></div>
-      ${!t.who ? (past ? `<span class="muted">Personne</span>` : `<button class="btn small" data-take="${m.id}|${i.k}">Je prends</button>`)
-        : `<div class="row-end"><span class="owner">${jersey(t.who)}${t.who === S.me ? "Moi" : esc(t.who)}</span>${t.who === S.me && !past && !t.done ? `<button class="link" data-release="${m.id}|${i.k}">Libérer</button>` : ""}</div>`}
+      ${!t.who ? `<button class="btn small" data-take="${m.id}|${i.k}">Je prends</button>`
+        : `<div class="row-end"><span class="owner">${jersey(t.who)}${t.who === S.me ? "Moi" : esc(t.who)}</span>${t.who === S.me && (past || !t.done) ? `<button class="link" data-release="${m.id}|${i.k}">Libérer</button>` : ""}</div>`}
     </div>`;
   }).join("");
 
@@ -799,20 +839,20 @@ function renderSheet() {
     const cars = drivers.map(d => {
       const ps = passengers.filter(p => p.car === d.who);
       const left = (d.seats || 0) - ps.length;
-      const canJoin = !past && !mine && left > 0;
+      const canJoin = !mine && left > 0;
       return `<div class="card car">
         <div class="car-top">${jersey(d.who)}<div><b>${esc(d.who)}</b><div class="note">conduit</div></div>
           <span class="pill ${left > 0 ? "ext" : "dom"} seats-left num">${left > 0 ? `${left} place${left > 1 ? "s" : ""}` : "Complet"}</span></div>
         <div class="seats">${ps.map(p => `<span class="seat">${jersey(p.who)}${esc(p.who)}</span>`).join("")}${Array.from({ length: Math.max(0, left) }, () => `<span class="seat empty">Libre</span>`).join("")}</div>
         ${canJoin ? `<button class="btn small" data-join="${esc(d.who)}" style="justify-self:start">Monter avec ${esc(d.who)}</button>` : ""}
-        ${mine && mine.who === S.me && (mine.role === "driver" ? d.who === S.me : mine.car === d.who) && !past ? `<button class="btn ghost small" data-leave style="justify-self:start">${mine.role === "driver" ? "Retirer ma voiture" : "Descendre"}</button>` : ""}
+        ${mine && mine.who === S.me && (mine.role === "driver" ? d.who === S.me : mine.car === d.who) ? `<button class="btn ghost small" data-leave style="justify-self:start">${mine.role === "driver" ? "Retirer ma voiture" : "Descendre"}</button>` : ""}
       </div>`;
     }).join("");
     const inCar = new Set([...drivers.map(d => d.who), ...passengers.map(p => p.who)]);
     const without = PLAYERS.filter(p => !inCar.has(p));
     extra = `<div class="section"><div class="section-head"><h3>Covoiturage</h3><span class="label num">${drivers.length} voiture${drivers.length > 1 ? "s" : ""}</span></div>
       ${cars || `<div class="card" style="padding:14px"><b>Aucune voiture proposée.</b><div class="note">Tu as une voiture ? Propose-la ci-dessous.</div></div>`}
-      ${!past && !mine ? `<div class="card drive-form"><span style="font-weight:600">Je conduis, places libres :</span>
+      ${!mine ? `<div class="card drive-form"><span style="font-weight:600">Je conduis, places libres :</span>
         <span class="stepper"><button data-seat="-1" aria-label="Moins">−</button><output class="num">${S.draftSeats}</output><button data-seat="1" aria-label="Plus">+</button></span>
         <button class="btn small" data-drive>Proposer ma voiture</button></div>` : ""}
       ${!past ? `<div class="note">Pas encore dans une voiture : ${without.map(esc).join(", ") || "tout le monde est casé"}.</div>` : ""}
@@ -829,6 +869,9 @@ function renderSheet() {
       <div class="section"><div class="section-head"><h3>${m.home ? "Repas & maillots" : "Maillots"}</h3><span class="label">Coche quand c'est fait</span></div>
         <div class="card rows">${rows}</div></div>
       ${extra}
+      ${m.custom ? `<div class="section" style="grid-column:1/-1"><div class="note">Match ajouté depuis l'appli.</div>
+        ${S.confirmDel ? `<div class="card drive-form"><span style="font-weight:600">Supprimer ce match et ses inscriptions ?</span><button class="btn small" data-del-yes>Oui, supprimer</button><button class="btn ghost small" data-del-no>Annuler</button></div>`
+          : `<button class="link" data-del style="justify-self:start">Supprimer ce match</button>`}</div>` : ""}
     </div></div></div>`;
   const sh = root.querySelector(".sheet");
   sh.scrollTop = scroll;
@@ -855,13 +898,42 @@ function bindMain() {
   $("#switch").onclick = logout;
   $("#logout") && ($("#logout").onclick = logout);
   document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.tab = b.dataset.tab; store.set("rm2.tab", S.tab); render(); window.scrollTo(0, 0); });
+  document.querySelectorAll("[data-new]").forEach(b => b.onclick = () => { S.sheet = "new"; renderSheet(); });
   document.querySelectorAll("[data-bfilter]").forEach(b => b.onclick = () => { S.boardFilter = b.dataset.bfilter; render(); });
   document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { S.calFilter = b.dataset.filter; render(); });
 }
 function logout() { S.me = null; S.sheet = null; store.set("rm2.me", null); render(); window.scrollTo(0, 0); }
+function renderNewSheet(root) {
+  document.body.style.overflow = "hidden";
+  const d = S.draft;
+  root.innerHTML = `<div class="scrim" data-close><div class="sheet narrow" role="dialog" aria-modal="true" aria-label="Ajouter un match">
+    <div class="sheet-head"><span class="grab"></span><div><div class="label">Calendrier</div><h2>Ajouter un match</h2></div>
+      <button class="x" data-x aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+    <form class="card newform" id="new-match-form">
+      <label for="nm-date">Date du match</label>
+      <input type="date" id="nm-date" value="${esc(d.date)}" required>
+      <label for="nm-opp">Adversaire</label>
+      <input type="text" id="nm-opp" value="${esc(d.opp)}" maxlength="40" placeholder="Ex. Saint Jory" autocomplete="off" required>
+      <span class="lbl">Lieu</span>
+      <div class="seg"><button type="button" data-home="1" class="${d.home ? "on" : ""}" aria-pressed="${d.home}">Domicile</button><button type="button" data-home="0" class="${d.home ? "" : "on"}" aria-pressed="${!d.home}">Extérieur</button></div>
+      <div class="note">${d.home ? "Domicile : repas d'après-match, maillots." : "Extérieur : maillots et covoiturage, pas de repas."}</div>
+      <button class="btn" type="submit">Ajouter au calendrier</button>
+    </form></div></div>`;
+  const close = () => { S.sheet = null; renderSheet(); };
+  root.querySelector("[data-close]").onclick = e => { if (e.target === e.currentTarget) close(); };
+  root.querySelector("[data-x]").onclick = close;
+  const di = root.querySelector("#nm-date"), oi = root.querySelector("#nm-opp");
+  di.oninput = () => { S.draft.date = di.value; };
+  oi.oninput = () => { S.draft.opp = oi.value; };
+  root.querySelectorAll("[data-home]").forEach(b => b.onclick = () => { S.draft.home = b.dataset.home === "1"; renderSheet(); });
+  root.querySelector("#new-match-form").onsubmit = e => { e.preventDefault(); addMatch(); };
+}
 function bindSheet(root, m) {
   bindCommon(root);
-  const close = () => { S.sheet = null; renderSheet(); };
+  const close = () => { S.sheet = null; S.confirmDel = false; renderSheet(); };
+  root.querySelector("[data-del]") && (root.querySelector("[data-del]").onclick = () => { S.confirmDel = true; renderSheet(); });
+  root.querySelector("[data-del-no]") && (root.querySelector("[data-del-no]").onclick = () => { S.confirmDel = false; renderSheet(); });
+  root.querySelector("[data-del-yes]") && (root.querySelector("[data-del-yes]").onclick = () => deleteMatch(m));
   root.querySelector("[data-close]").onclick = e => { if (e.target === e.currentTarget) close(); };
   root.querySelector("[data-x]").onclick = close;
   root.querySelectorAll("[data-seat]").forEach(b => b.onclick = () => { S.draftSeats = Math.min(8, Math.max(1, S.draftSeats + Number(b.dataset.seat))); renderSheet(); });
@@ -907,6 +979,7 @@ render();
   const onErr = e => { if (e && (e.code === "revoked" || e.code === "permission-denied")) { S.db = null; S.dbState = "off"; render(); } };
   db.collection("assign").limit(1000).onSnapshot(s => { S.assign = toMap(s); render(); }, onErr);
   db.collection("rides").limit(1000).onSnapshot(s => { S.rides = toMap(s); render(); }, onErr);
+  db.collection("matches").limit(500).onSnapshot(s => { S.extra = toMap(s); rebuildMatches(); render(); }, onErr);
 })();
 </script>
 
